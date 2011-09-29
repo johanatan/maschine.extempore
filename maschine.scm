@@ -1,4 +1,4 @@
-(load "/Users/jonathan/Documents/impromptu/audio-data.scm")
+(load "/Users/jonathan/Documents/SourceCode/extempore_maschine/audio-data.scm")
 
 (define src srcMaschine)
 ;; (define src srcMidiSportA)
@@ -25,7 +25,7 @@
    (set-dial-by-index (get-dial-index dial-set dial) value))
 
 (define (get-dial-val dial-set dial)
-   (list-ref (car (cdddr dial-set)) (get-dial-index dial)))
+   (list-ref (car (cdddr dial-set)) (get-dial-index dial-set dial)))
 
 (define-simple-syntax (adjust param value)
    (set! param value))
@@ -38,18 +38,21 @@
 
 (define cur-pad 0)
 (define (handleDial channel dial value)
-   (set-dial-by-id (vector-ref dials cur-pad) dial value)
-   (print (vector-ref dials cur-pad))
-   (au:play:set-sample-data sampler 60 audio-data1)
-   (play-sample cur-pad))
+   (cond
+      ((and (>= dial 1) (<= dial 7))
+         (set-dial-by-id (vector-ref dials cur-pad) dial value)
+         (print (vector-ref dials cur-pad))
+         (play-sample cur-pad))))
 
 (define pad-translation (vector 12 13 14 15 8 9 10 11 4 5 6 7 0 1 2 3))
 (define (translate-pad pad)
    (vector-ref pad-translation pad))
 
 (define (handlePad channel pad velocity)
-   (set! cur-pad (translate-pad pad)
-   (play-sample cur-pad (+ 5 velocity)))
+   (cond
+      ((and (<= pad 15) (>= pad 0))
+         (set! cur-pad (translate-pad pad))
+         (play-sample cur-pad (+ 5 velocity)))))
 
 (define-simple-syntax (midi-log)
    (define io:midi-in

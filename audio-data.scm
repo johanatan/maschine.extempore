@@ -1,4 +1,4 @@
-(load "/Users/jonathan/Documents/impromptu/startup.scm")
+(load "/Users/jonathan/Documents/SourceCode/extempore_maschine/startup.scm")
 
 (define audio-files (vector
    "/Users/Shared/Maschine Library/Samples/One Shots/Strike/Bend ClickStart.wav"
