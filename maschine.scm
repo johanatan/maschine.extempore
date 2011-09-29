@@ -15,7 +15,7 @@
    (set-list-ref (car (cdddr dial-set)) i val))
 
 (define (set-dial-by-id dial-set id val)
-   (let ((i (intlist-index 102 (caddr dial-set))))
+   (let ((i (intlist-index id (caddr dial-set))))
       (set-dial-by-index dial-set i val)))
 
 (define (get-dial-index dial-set dial)
