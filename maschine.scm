@@ -34,7 +34,7 @@
    (max (min val maximum) minimum))
 
 (define-simple-syntax (toggle param value)
-   (set! param (if (> value 0) #t #f)))                   
+   (set! param (> value 0)))                   
 
 (define (play-sample-vol index volume)
    (play-note (now) (vector-ref samplers index)
@@ -59,7 +59,6 @@
 
 (define note-repeat #f)
 (define (handle-pad channel pad velocity)
-   (print pad)
    (cond
       ((and (<= pad 15) (>= pad 0))
          (set! cur-pad (translate-pad pad))
@@ -67,7 +66,6 @@
          (if (> velocity 0)
             (begin
                (play-sample-vol cur-pad (+ 35 velocity))
-               (print note-repeat)
                (if note-repeat
                   (callback (+ (now) 5000) 'handle-pad channel pad velocity)))))
       ((= pad 127) (toggle note-repeat velocity))))
