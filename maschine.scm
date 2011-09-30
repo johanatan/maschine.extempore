@@ -40,7 +40,7 @@
    (truncate (+ minimum (* (/ val 127) maximum))))
 
 (define-simple-syntax (toggle param value)
-   (set! param (> value 0)))                   
+   (set! param (> value 0)))
 
 (define (get-param-val index parameter)
    (get-dial-val (vector-ref dials index) parameter))
@@ -61,9 +61,8 @@
          (set-dial-by-id (vector-ref dials cur-pad) dial value)
          (print (vector-ref dials cur-pad)))))
 
-(define pad-translation (vector 12 13 14 15 8 9 10 11 4 5 6 7 0 1 2 3))
 (define (translate-pad pad)
-   (vector-ref pad-translation pad))
+   (vector-ref (vector 12 13 14 15 8 9 10 11 4 5 6 7 0 1 2 3) pad))
 
 (define (get-pace index)
    (scale 250 7500 (get-param-val cur-pad "pace")))
