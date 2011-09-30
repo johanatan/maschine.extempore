@@ -1,3 +1,6 @@
+;; Copyright (c) 2011 - Jonathan Leonard
+;;
+
 (define-syntax define-simple-syntax
   (syntax-rules ()
      ((_ (name arg ...) body ...)

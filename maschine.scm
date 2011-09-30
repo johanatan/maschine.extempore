@@ -1,3 +1,6 @@
+;; Copyright (c) 2011 - Jonathan Leonard
+;;
+
 (load "/Users/jonathan/Documents/SourceCode/extempore_maschine/audio-data.scm")
 
 (define src srcMaschine)
