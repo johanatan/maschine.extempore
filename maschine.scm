@@ -30,14 +30,23 @@
 (define-simple-syntax (adjust param value)
    (set! param value))
 
-(define (play-sample index)
+(define (clip val minimum maximum)
+   (max (min val maximum) minimum))
+
+(define-simple-syntax (toggle param value)
+   (set! param (if (> value 0) #t #f)))                   
+
+(define (play-sample-vol index volume)
    (play-note (now) (vector-ref samplers index)
               (get-dial-val (vector-ref dials index) "pitch")
-              (get-dial-val (vector-ref dials index) "volume")
+              (clip 0 127 volume)
               (* 8000 (get-dial-val (vector-ref dials index) "decay"))))
 
+(define (play-sample index)
+   (play-sample-vol index (get-dial-val (vector-ref dials index) "volume")))
+
 (define cur-pad 0)
-(define (handleDial channel dial value)
+(define (handle-dial channel dial value)
    (cond
       ((and (>= dial 1) (<= dial 7))
          (set-dial-by-id (vector-ref dials cur-pad) dial value)
@@ -48,11 +57,20 @@
 (define (translate-pad pad)
    (vector-ref pad-translation pad))
 
-(define (handlePad channel pad velocity)
+(define note-repeat #f)
+(define (handle-pad channel pad velocity)
+   (print pad)
    (cond
       ((and (<= pad 15) (>= pad 0))
          (set! cur-pad (translate-pad pad))
-         (play-sample cur-pad (+ 5 velocity)))))
+         (print (vector-ref dials cur-pad))
+         (if (> velocity 0)
+            (begin
+               (play-sample-vol cur-pad (+ 35 velocity))
+               (print note-repeat)
+               (if note-repeat
+                  (callback (+ (now) 5000) 'handle-pad channel pad velocity)))))
+      ((= pad 127) (toggle note-repeat velocity))))
 
 (define-simple-syntax (midi-log)
    (define io:midi-in
@@ -64,8 +82,8 @@
    (define io:midi-in
       (lambda (device type channel a b)
          (cond
-            ((= type 11) (handleDial channel a b))
-            ((= type 9) (handlePad channel a b))))))
+            ((= type 11) (handle-dial channel a b))
+            ((= type 9) (handle-pad channel a b))))))
 
 (midi-log)
 (midi-play)
