@@ -47,9 +47,13 @@
 (define (get-param-val index parameter)
    (get-dial-val (vector-ref dials index) parameter))
 
+(define solo #f)
 (define mute #f)
+(define (muted)
+   (and (not solo) mute))
+
 (define (play-sample-vol index volume)
-   (if (not mute)
+   (if (not (muted))
       (play-note (now) (vector-ref samplers index)
                        (get-param-val index "pitch")
                        (clip 0 127 volume)
@@ -81,13 +85,16 @@
                (set! cur-pad pad)))
          (if (> velocity 0)
             (begin
-               (if (not mute)
+               (if (not (muted))
                   (play-sample-vol pad (min (+ 35 velocity) (get-param-val pad "volume"))))
                (if note-repeat
                   (callback (+ (now) (get-time pad)) 'handle-pad channel pad velocity #f)))))
       ((= pad 127) (toggle note-repeat velocity))
-      ((and (= pad 93) (= channel 7)) (toggle-shift shift velocity #f))
-      ((and (= pad 102) (= channel 7)) (toggle mute velocity))))
+      ((= channel 7)
+         (cond
+           ((= pad 93) (toggle-shift shift velocity #f))
+           ((= pad 102) (toggle mute velocity))
+           ((= pad 30) (toggle solo velocity))))))
 
 (define-simple-syntax (midi-log)
    (define io:midi-in
@@ -105,4 +112,4 @@
 (midi-log)
 (midi-play)
 
-(play-note (now) (vector-ref samplers 0) 60 127 185000)
+(play-note (now) (vector-ref samplers 0) 60 127 185000
