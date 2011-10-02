@@ -4,15 +4,13 @@
 (load "/Users/jonathan/Documents/SourceCode/extempore_maschine/audio-data.scm")
 
 (define src srcMaschine)
-;; (define src srcMidiSportA)
-;; (define src srcMidiSportB)
 
-(define dials (make-vector (vector-length samplers)
+(define dials (make-initialized-vector (vector-length samplers) (lambda (i)
       (list
          (list "pitch" "volume" "pace" "duration" "attack" "decay" "sustain" "release") ;; parameter
          (list  7       7        7      6          6        6       6         6)        ;; channel
          (list  11      12       13     14         15       16      17        18)       ;; dial
-         (list  60      100      64     64         64       64      64        64))))    ;; value
+         (list  60      100      64     64         64       64      64        64)))))   ;; value
 
 (define (set-dial-by-index dial-set i val)
    (set-list-ref (car (cdddr dial-set)) i val))
@@ -39,17 +37,23 @@
 (define (scale minimum maximum val)
    (truncate (+ minimum (* (/ val 127) maximum))))
 
+(define-simple-syntax (toggle-shift param value shiftval)
+   (set! param (or shiftval (> value 0))))
+
+(define shift #f)
 (define-simple-syntax (toggle param value)
-   (set! param (> value 0)))
+   (toggle-shift param value shift))
 
 (define (get-param-val index parameter)
    (get-dial-val (vector-ref dials index) parameter))
 
+(define mute #f)
 (define (play-sample-vol index volume)
-   (play-note (now) (vector-ref samplers index)
-              (get-param-val index "pitch")
-              (clip 0 127 volume)
-              (* 8000 (get-param-val index "duration"))))
+   (if (not mute)
+      (play-note (now) (vector-ref samplers index)
+                       (get-param-val index "pitch")
+                       (clip 0 127 volume)
+                       (* 8000 (get-param-val index "duration")))))
 
 (define (play-sample index)
    (play-sample-vol index (get-param-val index "volume")))
@@ -64,21 +68,26 @@
 (define (translate-pad pad)
    (vector-ref (vector 12 13 14 15 8 9 10 11 4 5 6 7 0 1 2 3) pad))
 
-(define (get-pace index)
-   (scale 250 7500 (get-param-val cur-pad "pace")))
+(define (get-time index)
+   (scale 150 17500 (get-param-val index "pace")))
 
 (define note-repeat #f)
-(define (handle-pad channel pad velocity)
+(define (handle-pad channel pad velocity set-cur-pad)
    (cond
       ((and (<= pad 15) (>= pad 0))
-         (set! cur-pad (translate-pad pad))
-         (print (vector-ref dials cur-pad))
+         (if set-cur-pad
+            (begin
+               (set! pad (translate-pad pad))
+               (set! cur-pad pad)))
          (if (> velocity 0)
             (begin
-               (play-sample-vol cur-pad (min (+ 35 velocity) (get-param-val cur-pad "volume")))
+               (if (not mute)
+                  (play-sample-vol pad (min (+ 35 velocity) (get-param-val pad "volume"))))
                (if note-repeat
-                  (callback (+ (now) (get-pace cur-pad)) 'handle-pad channel pad velocity)))))
-      ((= pad 127) (toggle note-repeat velocity))))
+                  (callback (+ (now) (get-time pad)) 'handle-pad channel pad velocity #f)))))
+      ((= pad 127) (toggle note-repeat velocity))
+      ((and (= pad 93) (= channel 7)) (toggle-shift shift velocity #f))
+      ((and (= pad 102) (= channel 7)) (toggle mute velocity))))
 
 (define-simple-syntax (midi-log)
    (define io:midi-in
@@ -91,7 +100,7 @@
       (lambda (device type channel a b)
          (cond
             ((= type 11) (handle-dial channel a b))
-            ((= type 9) (handle-pad channel a b))))))
+            ((= type 9) (handle-pad channel a b #t))))))
 
 (midi-log)
 (midi-play)
