@@ -47,3 +47,7 @@
                 (vector-set! vector index (initialization index))
                 (loop (+ index 1)))))
     vector))
+
+(define last
+   (lambda (ls)
+      (list-ref ls (- (length ls) 1))))

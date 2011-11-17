@@ -5,11 +5,15 @@
 
 (define src srcMaschine)
 
+(define maschineDials (list 11 12 13 14 15 16 17 18))
+(define rolandDials   (list 4  5  6  7  8  9  10 11))
+(define dialIDs rolandDials)
+
 (define dials (make-initialized-vector (vector-length samplers) (lambda (i)
       (list
          (list "pitch" "volume" "pace" "duration" "attack" "decay" "sustain" "release") ;; parameter
          (list  7       7        7      6          6        6       6         6)        ;; channel
-         (list  11      12       13     14         15       16      17        18)       ;; dial
+         dialIDs                                                                        ;; dial ID
          (list  60      100      64     64         64       64      64        64)))))   ;; value
 
 (define (set-dial-by-index dial-set i val)
@@ -49,8 +53,7 @@
 
 (define solo #f)
 (define mute #f)
-(define (muted)
-   (and (not solo) mute))
+(define (muted) (and (not solo) mute))
 
 (define (play-sample-vol index volume)
    (if (not (muted))
@@ -65,7 +68,7 @@
 (define cur-pad 0)
 (define (handle-dial channel dial value)
    (cond
-      ((and (>= dial 11) (<= dial 17))
+      ((and (>= dial (car dialIDs)) (<= dial (last dialIDs)))
          (set-dial-by-id (vector-ref dials cur-pad) dial value)
          (print (vector-ref dials cur-pad)))))
 
