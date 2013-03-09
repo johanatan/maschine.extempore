@@ -7,7 +7,7 @@
 
 (define maschineDials (list 11 12 13 14 15 16 17 18))
 (define rolandDials   (list 4  5  6  7  8  9  10 11))
-(define dialIDs rolandDials)
+(define dialIDs maschineDials)
 
 (define dials (make-initialized-vector (vector-length samplers) (lambda (i)
       (list
@@ -78,6 +78,8 @@
 (define (get-time index)
    (scale 150 17500 (get-param-val index "pace")))
 
+   (set! pad (modulo 15 pad))
+
 (define note-repeat #f)
 (define (handle-pad channel pad velocity set-cur-pad)
    (cond
@@ -111,8 +113,8 @@
          (cond
             ((= type 11) (handle-dial channel a b))
             ((= type 9) (handle-pad channel a b #t))))))
-
+(io:print-midi-sources)
 (midi-log)
 (midi-play)
 
-(play-note (now) (vector-ref samplers 0) 60 127 185000
+(play-note (now) (vector-ref samplers 0) 60 127 185000)

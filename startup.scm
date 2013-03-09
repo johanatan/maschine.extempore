@@ -1,4 +1,4 @@
-;; Copyright (c) 2011 - Jonathan Leonard
+;; Copyright (c) 2011-2013 - Jonathan Leonard
 ;;
 
 (define-syntax define-simple-syntax
@@ -48,6 +48,5 @@
                 (loop (+ index 1)))))
     vector))
 
-(define last
-   (lambda (ls)
-      (list-ref ls (- (length ls) 1))))
+(define (last ls)
+   (list-ref ls (- (length ls) 1))))
