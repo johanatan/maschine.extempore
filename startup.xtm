@@ -1,9 +1,11 @@
 ;; Copyright (c) 2011-2013 - Jonathan Leonard
 ;;
 
+(load "./maschine.extempore/mbe.xtm")
+
 (define-syntax define-simple-syntax
-  (syntax-rules ()
-     ((_ (name arg ...) body ...)
+   (syntax-rules ()
+      ((_ (name arg ...) body ...)
       (define-syntax name (syntax-rules () ((name arg ...) (begin body ...)))))))
 
 (define (list-index s los comp)
@@ -27,16 +29,9 @@
          ((= n 0) (set-car! los v))
          (else (set-list-ref (cdr los) (- n 1) v))))
 
-(define srcMaschine (io:midi-source 0))
-(define srcMidiSportA (io:midi-source 1))
-(define srcMidiSportB (io:midi-source 2))
-
-(define-simple-syntax (list-mixers)
-   (au:print-audiounits "aumx"))
-(define-simple-syntax (list-generators)
-   (au:print-audiounits "augn"))
-(define-simple-syntax (list-instruments)
-   (au:print-audiounits "aumu"))
+;;(define srcMaschine (io:midi-source 0))
+;;(define srcMidiSportA (io:midi-source 1))
+;;(define srcMidiSportB (io:midi-source 2))
 
 (define (make-initialized-vector length initialization)
    ;; LENGTH is checked by MAKE-VECTOR
@@ -49,4 +44,4 @@
     vector))
 
 (define (last ls)
-   (list-ref ls (- (length ls) 1))))
+   (list-ref ls (- (length ls) 1)))
